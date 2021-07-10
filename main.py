@@ -7,8 +7,8 @@ from yandexclients import SpeechRecognition, SpeechRecognitionException, IAMToke
 
 
 class SpeechRecognitionTGBot:
-    def __init__(self, telegram_token: str, oauth_token: str, folder_id: str):
-        self._speech_recognition = SpeechRecognition(IAMToken(oauth_token=oauth_token), folder_id)
+    def __init__(self, telegram_token: str, speech_recognition: SpeechRecognition):
+        self._speech_recognition = speech_recognition
         self._updater = Updater(token=telegram_token)
         dispatcher: Dispatcher = self._updater.dispatcher
 
@@ -47,7 +47,9 @@ def main():
     yandex_oauth_token = read_token_from_file('data/yandex-oauth-token.txt')
     yandex_folder_id = read_token_from_file('data/yandex-folder-id.txt')
 
-    srtb = SpeechRecognitionTGBot(telegram_token, yandex_oauth_token, yandex_folder_id)
+    speech_recognition = SpeechRecognition(IAMToken(oauth_token=yandex_oauth_token), yandex_folder_id)
+
+    srtb = SpeechRecognitionTGBot(telegram_token, speech_recognition)
     srtb.start()
 
 

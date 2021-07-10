@@ -19,7 +19,8 @@ class SpeechRecognitionTGBot:
         self._updater.start_polling()
 
     def __start(self, update: Update, context: CallbackContext):
-        context.bot.send_message(chat_id=update.effective_chat.id, text="Бот")
+        context.bot.send_message(chat_id=update.effective_chat.id,
+                                 text="Этот бот распознает текст голосовых сообщений и пишет его в ответ.")
 
     def __voice_or_audio_message(self, update: Update, context: CallbackContext):
         if update.message.voice:

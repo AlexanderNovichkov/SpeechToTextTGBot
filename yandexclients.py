@@ -1,14 +1,13 @@
 import threading
 import time
+from collections import namedtuple
 from datetime import timedelta
 
 import requests
 
 
 class IAMToken:
-    TIME_BETWEEN_UPDATES = timedelta(hours=1)
-
-    def __init__(self, oauth_token: str, time_between_update: timedelta = TIME_BETWEEN_UPDATES):
+    def __init__(self, oauth_token: str, time_between_update: timedelta = timedelta(hours=1)):
         self.__oauth_token = oauth_token
         self.__time_between_updates = time_between_update
         self.__iam_token = None
@@ -39,18 +38,27 @@ class SpeechRecognitionException(Exception):
     pass
 
 
+class Language:
+    def __init__(self, name: str, code: str):
+        self.name = name
+        self.code = code
+
+
 class SpeechRecognition:
-    BASE_URL = 'https://stt.api.cloud.yandex.net/speech/v1/stt:recognize'
+    __BASE_URL = 'https://stt.api.cloud.yandex.net/speech/v1/stt:recognize'
+
+    LANGUAGES = [Language('Russian', 'ru-RU'), Language('English', 'en-US')]
 
     def __init__(self, iam_token: IAMToken, folder_id: str):
         self._iam_token = iam_token
         self._folder_id = folder_id
 
-    def recognize(self, speech: bytes):
-        params = {'folderId': self._folder_id}
+    def __call__(self, speech: bytes, language_code: str) -> str:
+        params = {'folderId': self._folder_id,
+                  'lang': language_code}
         headers = {'Authorization': f'Bearer {self._iam_token.get()}'}
         try:
-            response = requests.post(self.BASE_URL, params=params, data=speech, headers=headers)
+            response = requests.post(self.__BASE_URL, params=params, data=speech, headers=headers)
         except requests.exceptions.RequestException as e:
             raise SpeechRecognitionException
         if response.status_code != 200:

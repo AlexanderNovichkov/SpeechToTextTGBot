@@ -25,30 +25,37 @@ class SpeechRecognitionTGBot:
     def __init__(self, telegram_token: str, speech_recognition: SpeechRecognition):
         self._speech_recognition = speech_recognition
 
+        # Нужно, чтобы не потерять данные чатов при перезапуске бота
         persistence = PicklePersistence(filename="botdata.pickle")
         self._updater = Updater(token=telegram_token, persistence=persistence)
 
         dispatcher: Dispatcher = self._updater.dispatcher
 
-        dispatcher.add_handler(CommandHandler("start", self.__start))
-        dispatcher.add_handler(CommandHandler("language", self.__language))
+        dispatcher.add_handler(CommandHandler("start", self.__start_command_handler))
+        dispatcher.add_handler(
+            CommandHandler("language", self.__language_command_handler)
+        )
         dispatcher.add_handler(CallbackQueryHandler(self.__keyboard_callback_handler))
         dispatcher.add_handler(
-            MessageHandler(Filters.audio | Filters.voice, self.__voice_or_audio_message)
+            MessageHandler(
+                Filters.audio | Filters.voice, self.__voice_or_audio_message_handler
+            )
         )
 
     def start(self):
         self._updater.start_polling()
         self._updater.idle()
 
-    def __start(self, update: Update, context: CallbackContext):
+    def __start_command_handler(self, update: Update, context: CallbackContext):
         context.bot.send_message(
             chat_id=update.effective_chat.id,
-            text="Этот бот распознает текст голосовых сообщений и пишет его в ответ.\n\n"
-            "/language - выбор языка распознавания речи",
+            text=(
+                "Этот бот распознает текст голосовых сообщений и пишет его в ответ.\n\n"
+                "/language - выбор языка распознавания речи"
+            ),
         )
 
-    def __language(self, update: Update, context: CallbackContext):
+    def __language_command_handler(self, update: Update, context: CallbackContext):
         keyboard = InlineKeyboardMarkup(
             [
                 [
@@ -82,7 +89,9 @@ class SpeechRecognitionTGBot:
         query.edit_message_text(f"Выбран язык распознавания: {language.name}")
         self.__set_new_chat_language(language, context)
 
-    def __voice_or_audio_message(self, update: Update, context: CallbackContext):
+    def __voice_or_audio_message_handler(
+        self, update: Update, context: CallbackContext
+    ):
         if update.message.voice:
             speech: bytes = update.message.voice.get_file().download_as_bytearray()
         else:

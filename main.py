@@ -50,7 +50,8 @@ class SpeechRecognitionTGBot:
         context.bot.send_message(
             chat_id=update.effective_chat.id,
             text=(
-                "Этот бот распознает текст голосовых сообщений и пишет его в ответ.\n\n"
+                "Этот бот распознает текст голосовых сообщений и пишет его в ответ."
+                "\n\n"
                 "/language - выбор языка распознавания речи"
             ),
         )
@@ -105,8 +106,8 @@ class SpeechRecognitionTGBot:
                 text = "Не получилось здесь распознать речь"
         except SpeechRecognitionException:
             text = (
-                "Ошибка при распознавании. "
-                "Возможно, данный формат не поддерживается, или длительность больше 30 секунд."
+                "Ошибка при распознавании. Возможно, данный формат не поддерживается, "
+                "или длительность больше 30 секунд."
             )
         context.bot.send_message(
             reply_to_message_id=update.message.message_id,

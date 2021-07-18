@@ -73,10 +73,9 @@ class SpeechRecognitionTGBot:
                 filter(
                     lambda lang: lang.code == language_code,
                     self._speech_recognition.LANGUAGES,
-                ),
-                None,
+                )
             )
-        except:
+        except StopIteration:
             query.edit_message_text(f"Ошибка при обработке клавиатуры")
             return
 
